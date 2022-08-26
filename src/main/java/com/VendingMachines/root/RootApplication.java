@@ -1,4 +1,4 @@
-package com.VendingMachines;
+package com.VendingMachines.root;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -9,11 +9,10 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 
 @SpringBootApplication
-public class DemoApplication {
+public class RootApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(DemoApplication.class, args);
-
+		SpringApplication.run(RootApplication.class, args);
 	}
 	@Bean
 	public Docket api() {
@@ -23,5 +22,4 @@ public class DemoApplication {
 				.paths(PathSelectors.any())
 				.build();
 	}
-
 }
