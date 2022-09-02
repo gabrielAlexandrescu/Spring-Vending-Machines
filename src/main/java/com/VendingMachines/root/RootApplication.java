@@ -13,6 +13,7 @@ public class RootApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(RootApplication.class, args);
+
 	}
 	@Bean
 	public Docket api() {
@@ -22,4 +23,5 @@ public class RootApplication {
 				.paths(PathSelectors.any())
 				.build();
 	}
+
 }
