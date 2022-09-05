@@ -1,24 +1,50 @@
 package com.VendingMachines.root.entities;
-import com.sun.istack.NotNull;
 import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
+import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
+import java.util.UUID;
 
 @Entity
+@Component
 public class Slot {
     @Getter
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long ID;
+    @Setter
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(
+            name = "UUID",
+            strategy = "org.hibernate.id.UUIDGenerator"
+    )
+    private UUID ID;
     @Getter
     private String code;
     @Getter
-    @OneToOne(mappedBy = "Products")
+    @Setter
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name ="fk_product_id",referencedColumnName = "ID")
     private Product product;
     @Getter
+    @Setter
     private int amount;
     @Getter
-    private Long vendingMachineID;
+    @Setter
+    private int price;
+    @Getter
+    @Setter
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name ="fk_vm_id",referencedColumnName = "ID")
+    private VendingMachine vendingMachine;
 
+    public Slot(String code,int price) {
+        product = null;
+        this.code = code;
+        this.price = price;
+    }
 
+    public Slot() {
+
+    }
 }

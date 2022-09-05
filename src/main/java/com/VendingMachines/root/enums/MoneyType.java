@@ -1,8 +1,8 @@
 package com.VendingMachines.root.enums;
 
-import javax.persistence.Embeddable;
+import lombok.Getter;
 
-@Embeddable
+
 public enum MoneyType {
     FIFTY_EUROS(5000),
     TWENTY_EUROS(2000),
@@ -15,11 +15,16 @@ public enum MoneyType {
     TEN_CENTS(10),
     FIVE_CENTS(5),
     ONE_CENT(1);
+    @Getter
+    int value;
 
     MoneyType(int value) {
+        this.value = value;
     }
 
     MoneyType() {
 
     }
+
+
 }

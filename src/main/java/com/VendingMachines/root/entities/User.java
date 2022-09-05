@@ -1,23 +1,34 @@
 package com.VendingMachines.root.entities;
 
+import com.VendingMachines.root.commons.Utils;
+import com.VendingMachines.root.enums.MoneyType;
+import com.VendingMachines.root.model.MoneyDTO;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnJava;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 
 @Entity
 @Table(name = "Users")
 public class User {
-    @Setter
     @Getter
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long ID;
+    @Setter
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(
+            name = "UUID",
+            strategy = "org.hibernate.id.UUIDGenerator"
+    )
+    private UUID ID;
     @Getter
     @Setter
     private String username;
@@ -27,17 +38,22 @@ public class User {
     @Getter
     @Setter
     private String role;
-    @Embedded
+    @OneToMany(cascade = CascadeType.ALL)
     @Getter
-    private UserWallet userWallet;
+    @Setter
+    @JoinColumn(name="fk_user_id",referencedColumnName = "ID")
+    private List<MoneyDTO> userWallet;
     @Getter
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @Setter
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name="fk_transactions_id",referencedColumnName = "ID")
     private List<Transaction> transactions;
 
     public User(String username, String password, boolean isAdmin) {
         this.username = username;
         this.password = password;
-        this.userWallet = new UserWallet();
+        this.userWallet = new ArrayList<>();
+        Utils.buildGenericWallet(userWallet);
         this.transactions = new ArrayList<>();
         if (isAdmin) {
             this.role = "admin";
@@ -50,4 +66,6 @@ public class User {
     public User() {
 
     }
+
+
 }
