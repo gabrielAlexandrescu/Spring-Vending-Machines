@@ -3,7 +3,6 @@ package com.VendingMachines.root.api;
 import com.VendingMachines.root.entities.User;
 import com.VendingMachines.root.model.UserDTO;
 import com.VendingMachines.root.services.UserService;
-import lombok.Getter;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
@@ -21,9 +20,10 @@ public class UsersController {
     }
 
     @GetMapping
-    public List<User> getUsers() {
+    public List<UserDTO> getUsers() {
         return userService.getAllUsers();
     }
+
 
     @PostMapping
     public void addUser(@RequestBody UserDTO userDTO) {
@@ -44,11 +44,16 @@ public class UsersController {
         userService.delete(Id);
     }
     @GetMapping(path="/getByID/")
-    public User getUserByID(UUID ID){
+    public UserDTO getUserByID(UUID ID){
         return userService.findByID(ID);
     }
     @GetMapping(path = "/getByUsername/")
     public User getUserByUsername(@RequestParam String username){
         return userService.findByUsername(username);
+    }
+
+    @GetMapping(path = "/getAllAdmins/")
+    public List<UserDTO> getAllAdmins(){
+        return userService.getAllAdmins();
     }
 }

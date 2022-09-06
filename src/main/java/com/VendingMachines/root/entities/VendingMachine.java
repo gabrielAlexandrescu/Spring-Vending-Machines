@@ -2,18 +2,17 @@ package com.VendingMachines.root.entities;
 
 import com.VendingMachines.root.commons.Utils;
 import com.VendingMachines.root.enums.ProductType;
-import com.VendingMachines.root.exceptions.VendingMachineException;
 import com.VendingMachines.root.model.MoneyDTO;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @Entity
+@NoArgsConstructor
 @Table(name = "VendingMachines")
 public class VendingMachine {
     @Getter
@@ -31,6 +30,7 @@ public class VendingMachine {
     @OneToMany
     @Getter
     @Setter
+    @JoinColumn(name = "fk_vm_id",referencedColumnName = "ID")
     private List<Slot> slots;
     @Getter
     @Setter
@@ -43,7 +43,7 @@ public class VendingMachine {
     @Getter
     @Setter
     @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "fk_vm_id", referencedColumnName = "ID")
+    @JoinColumn(name = "fk_vm_wallet_id", referencedColumnName = "ID")
     private List<MoneyDTO> vm_wallet;
     @Getter
     @Transient
@@ -62,9 +62,10 @@ public class VendingMachine {
     @Getter @Setter
     private String name;
     @Getter @Setter
-    private String adress;
+    private String address;
 
-    public VendingMachine(int limitOfProductPerSlot, List<Slot> slots, int limitOfMoneyPerValue, List<ProductType> productType,String name,String adress) {
+
+    public VendingMachine(int limitOfProductPerSlot, List<Slot> slots, int limitOfMoneyPerValue, List<ProductType> productType,String name,String address) {
         this.limitOfProductPerSlot = limitOfProductPerSlot;
         this.slots = slots;
         this.limitOfMoneyPerValue = limitOfMoneyPerValue;
@@ -77,12 +78,6 @@ public class VendingMachine {
         Utils.buildGenericWallet(change);
         currentMoneyAddedByUser = 0;
         this.name = name;
-        this.adress = adress;
+        this.address = address;
     }
-
-    public VendingMachine() {
-
-    }
-
-
 }

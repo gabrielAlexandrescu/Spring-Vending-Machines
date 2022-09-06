@@ -1,6 +1,7 @@
 package com.VendingMachines.root.entities;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -9,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
+@NoArgsConstructor
 public class Transaction {
     @Getter
     @Id
@@ -33,6 +35,4 @@ public class Transaction {
         this.product = product;
     }
 
-    public Transaction() {
-    }
 }

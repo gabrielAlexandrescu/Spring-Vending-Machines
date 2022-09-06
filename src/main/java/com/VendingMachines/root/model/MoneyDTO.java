@@ -2,6 +2,7 @@ package com.VendingMachines.root.model;
 
 import com.VendingMachines.root.enums.MoneyType;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.stereotype.Component;
@@ -11,6 +12,7 @@ import java.util.UUID;
 
 
 @Component
+@NoArgsConstructor
 @Table(name="wallets")
 @Entity
 public class MoneyDTO {
@@ -34,10 +36,6 @@ public class MoneyDTO {
     public MoneyDTO(MoneyType moneyType, int amount) {
         this.moneyType = moneyType;
         this.amount = amount;
-    }
-
-    public MoneyDTO() {
-
     }
 
 }

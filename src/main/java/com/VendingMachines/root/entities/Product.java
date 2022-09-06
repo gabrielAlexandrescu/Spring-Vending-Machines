@@ -2,6 +2,7 @@ package com.VendingMachines.root.entities;
 
 import com.VendingMachines.root.enums.ProductType;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -9,6 +10,7 @@ import javax.persistence.*;
 import java.util.UUID;
 
 @Entity
+@NoArgsConstructor
 @Table(name="Products")
 public class Product {
     @Getter
@@ -33,7 +35,9 @@ public class Product {
         this.productType = productType;
     }
 
-    public Product() {
-
+    public Product(UUID ID, String name, ProductType productType) {
+        this.ID = ID;
+        this.name = name;
+        this.productType = productType;
     }
 }

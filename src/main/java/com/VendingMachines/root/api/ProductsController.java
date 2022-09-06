@@ -1,6 +1,5 @@
 package com.VendingMachines.root.api;
 
-import com.VendingMachines.root.entities.Product;
 import com.VendingMachines.root.enums.ProductType;
 import com.VendingMachines.root.model.ProductDTO;
 import com.VendingMachines.root.services.ProductService;
@@ -19,7 +18,7 @@ public class ProductsController {
         this.productService = productService;
     }
     @GetMapping
-    public List<Product> getProducts() {
+    public List<ProductDTO> getProducts() {
         return productService.getAll();
     }
 
@@ -40,12 +39,12 @@ public class ProductsController {
     }
 
     @GetMapping(path = "/getByID/")
-    public Product getProductByID(UUID ID) {
+    public ProductDTO getProductByID(UUID ID) {
         return productService.findByID(ID);
     }
 
     @GetMapping(path = "/getByUsername/")
-    public Product getProductByName(@RequestParam String name) {
+    public ProductDTO getProductByName(@RequestParam String name) {
         return productService.findByName(name);
     }
 }

@@ -1,5 +1,6 @@
 package com.VendingMachines.root.entities;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.stereotype.Component;
@@ -9,6 +10,8 @@ import java.util.UUID;
 
 @Entity
 @Component
+@NoArgsConstructor
+@Table(name="slots")
 public class Slot {
     @Getter
     @Id
@@ -32,19 +35,10 @@ public class Slot {
     @Getter
     @Setter
     private int price;
-    @Getter
-    @Setter
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name ="fk_vm_id",referencedColumnName = "ID")
-    private VendingMachine vendingMachine;
-
     public Slot(String code,int price) {
         product = null;
         this.code = code;
         this.price = price;
     }
 
-    public Slot() {
-
-    }
 }

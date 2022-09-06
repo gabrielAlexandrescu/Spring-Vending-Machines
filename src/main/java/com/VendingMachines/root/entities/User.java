@@ -4,6 +4,7 @@ import com.VendingMachines.root.commons.Utils;
 import com.VendingMachines.root.enums.MoneyType;
 import com.VendingMachines.root.model.MoneyDTO;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnJava;
@@ -18,6 +19,7 @@ import java.util.UUID;
 
 
 @Entity
+@NoArgsConstructor
 @Table(name = "Users")
 public class User {
     @Getter
@@ -61,11 +63,4 @@ public class User {
             this.role = "user";
         }
     }
-
-
-    public User() {
-
-    }
-
-
 }
