@@ -1,11 +1,15 @@
 package com.VendingMachines.root.api;
 
+import com.VendingMachines.root.commons.Utils;
 import com.VendingMachines.root.entities.User;
+import com.VendingMachines.root.enums.MoneyType;
+import com.VendingMachines.root.exceptions.UserException;
 import com.VendingMachines.root.model.UserDTO;
 import com.VendingMachines.root.services.UserService;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,7 +25,11 @@ public class UsersController {
 
     @GetMapping
     public List<UserDTO> getUsers() {
-        return userService.getAllUsers();
+        List<UserDTO> users = new ArrayList<>();
+        for(User user: userService.getAllUsers()){
+            users.add(Utils.convertUserToDTO(user));
+        }
+        return users;
     }
 
 
@@ -45,7 +53,7 @@ public class UsersController {
     }
     @GetMapping(path="/getByID/")
     public UserDTO getUserByID(UUID ID){
-        return userService.findByID(ID);
+        return Utils.convertUserToDTO(userService.findByID(ID));
     }
     @GetMapping(path = "/getByUsername/")
     public User getUserByUsername(@RequestParam String username){
@@ -54,6 +62,18 @@ public class UsersController {
 
     @GetMapping(path = "/getAllAdmins/")
     public List<UserDTO> getAllAdmins(){
-        return userService.getAllAdmins();
+        List<UserDTO> admins = new ArrayList<>();
+        for(User admin: userService.getAllAdmins()){
+            admins.add(Utils.convertUserToDTO(admin));
+        }
+        return admins;
+    }
+    @PostMapping(path = "/addMoneyToUserWallet")
+    public void addMoneyToWallet(@RequestParam UUID ID,@RequestParam MoneyType moneyType){
+        userService.addMoneyToWallet(ID,moneyType,1);
+    }
+    @PostMapping(path = "/removeMoneyFromWallet")
+    public void removeMoneyFromWallet(@RequestParam UUID ID,@RequestParam MoneyType moneyType) throws UserException {
+        userService.removeMoneyFromWallet(ID,moneyType,1);
     }
 }

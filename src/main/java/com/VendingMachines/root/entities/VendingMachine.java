@@ -44,11 +44,13 @@ public class VendingMachine {
     @Setter
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "fk_vm_wallet_id", referencedColumnName = "ID")
-    private List<MoneyDTO> vm_wallet;
+    private List<MoneyDTO> vmWallet;
     @Getter
+    @Setter
     @Transient
     private List<MoneyDTO> userInsertedMoney;
     @Getter
+    @Setter
     @Transient
     private List<MoneyDTO> change;
     @Getter
@@ -70,10 +72,10 @@ public class VendingMachine {
         this.slots = slots;
         this.limitOfMoneyPerValue = limitOfMoneyPerValue;
         this.productType = productType;
-        this.vm_wallet = new ArrayList<>();
+        this.vmWallet = new ArrayList<>();
         this.userInsertedMoney = new ArrayList<>();
         this.change = new ArrayList<>();
-        Utils.buildGenericWallet(vm_wallet);
+        Utils.buildGenericWallet(vmWallet);
         Utils.buildGenericWallet(userInsertedMoney);
         Utils.buildGenericWallet(change);
         currentMoneyAddedByUser = 0;

@@ -16,14 +16,7 @@ import java.util.UUID;
 @Component
 @NoArgsConstructor
 public class VendingMachineDTO {
-    @Id
-    @Getter
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-            name = "UUID",
-            strategy = "org.hibernate.id.UUIDGenerator"
-    )
-    private UUID ID;
+
     @Getter @Setter
     private String name;
     @Getter @Setter
@@ -36,9 +29,11 @@ public class VendingMachineDTO {
     private List<ProductType> productType;
     @Getter @Setter
     private List<Slot> slots;
+    @Getter @Setter
+    private UUID ID;
 
-    public VendingMachineDTO(UUID ID, String name, String address, int limitOfProductPerSlot, int limitOfMoneyPerValue, List<ProductType> productType, List<Slot> slots) {
-        this.ID = ID;
+    public VendingMachineDTO(String name, String address, int limitOfProductPerSlot, int limitOfMoneyPerValue, List<ProductType> productType, List<Slot> slots) {
+
         this.name = name;
         this.address = address;
         this.limitOfProductPerSlot = limitOfProductPerSlot;
@@ -46,5 +41,6 @@ public class VendingMachineDTO {
         this.productType = productType;
         this.slots = slots;
     }
+
 
 }

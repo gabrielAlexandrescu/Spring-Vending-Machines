@@ -63,4 +63,15 @@ public class User {
             this.role = "user";
         }
     }
+    public User(String username,String password, boolean isAdmin,List<MoneyDTO> userWallet){
+        this.username = username;
+        this.password = password;
+        if (isAdmin) {
+            this.role = "admin";
+        } else {
+            this.role = "user";
+        }
+        this.userWallet = userWallet;
+    }
+
 }

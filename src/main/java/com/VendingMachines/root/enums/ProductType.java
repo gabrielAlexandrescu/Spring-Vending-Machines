@@ -16,7 +16,12 @@ public enum ProductType {
     BREAD,
     SNACK_DAY,
     CHIPS,
-    PEANUTS;
+    PEANUTS,
+    SKITTLES,
+    FPP2_MASK,
+    MAGNET,
+    GUM,
+    CIGAR;
 
 
     @Override

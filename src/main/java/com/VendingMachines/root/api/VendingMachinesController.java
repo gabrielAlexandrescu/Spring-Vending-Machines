@@ -4,6 +4,7 @@ import com.VendingMachines.root.commons.Utils;
 import com.VendingMachines.root.entities.Product;
 import com.VendingMachines.root.entities.Slot;
 import com.VendingMachines.root.entities.VendingMachine;
+import com.VendingMachines.root.enums.MoneyType;
 import com.VendingMachines.root.exceptions.ProductException;
 import com.VendingMachines.root.exceptions.UserException;
 import com.VendingMachines.root.exceptions.VendingMachineException;
@@ -12,6 +13,7 @@ import com.VendingMachines.root.repositories.SlotsRepository;
 import com.VendingMachines.root.services.ProductService;
 import com.VendingMachines.root.services.UserService;
 import com.VendingMachines.root.services.VendingMachineService;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
@@ -29,6 +31,7 @@ public class VendingMachinesController {
     private final SlotsRepository slotsRepository;
     private final ProductService productService;
     private boolean currentlyOperating = false;
+    private List<String> userCodeList;
     private List<Slot> slotsForMachine;
 
     public VendingMachinesController(VendingMachineService vendingMachineService, UserService userService, SlotsRepository slotsRepository, ProductService productService) {
@@ -36,15 +39,21 @@ public class VendingMachinesController {
         this.userService = userService;
         this.slotsRepository = slotsRepository;
         this.productService = productService;
+        this.userCodeList = null;
     }
 
     @GetMapping
-    public List<VendingMachine> getVendingMachines() {
-        return vendingMachineService.getAllVendingMachines();
+    public List<VendingMachineDTO> getVendingMachines() {
+        List<VendingMachineDTO> vendingMachineDTOS = new ArrayList<>();
+        for(VendingMachine vm:vendingMachineService.getAllVendingMachines()){
+            vendingMachineDTOS.add(Utils.convertVendingMachineToDTO(vm));
+        }
+        return vendingMachineDTOS;
     }
+
     @PostMapping
     public void addVendingMachine(@RequestBody VendingMachineDTO vendingMachineDTO) throws VendingMachineException {
-        if(slotsForMachine == null){
+        if (slotsForMachine == null) {
             throw new VendingMachineException("Cannot instantiate vending machine with no slots!");
         }
         vendingMachineDTO.setSlots(slotsForMachine);
@@ -66,17 +75,17 @@ public class VendingMachinesController {
 
     @GetMapping(path = "/getByID/")
     public VendingMachineDTO getVendingMachineByID(UUID ID) {
-        return vendingMachineService.findByID(ID);
+        return Utils.convertVendingMachineToDTO(vendingMachineService.findByID(ID));
     }
 
     @GetMapping(path = "/getByUsername/")
     public VendingMachineDTO getVendingMachineByName(@RequestParam String name) {
-        return vendingMachineService.findByName(name);
+        return Utils.convertVendingMachineToDTO(vendingMachineService.findByName(name));
     }
 
     @GetMapping(path = "/getByAddress")
     public VendingMachineDTO getVendingMachineByAddress(@RequestParam String address) {
-        return vendingMachineService.findByAddress(address);
+        return Utils.convertVendingMachineToDTO(vendingMachineService.findByAddress(address));
     }
 
     @GetMapping(path = "/operateOnMachine")
@@ -90,13 +99,14 @@ public class VendingMachinesController {
             currentlyOperating = true;
             return "You are currently operating on the machine " + vendingMachineService.findByName(name);
         } catch (Exception e) {
-            return "An exception has occured: " + e.getMessage();
+            return "An exception has occurred: " + e.getMessage();
         }
     }
 
     @GetMapping(path = "/logOnMachine")
     public String logOnMachine(@RequestParam String username, @RequestParam String password) throws UserException {
         if (userService.logIn(username, password)) {
+            vendingMachineService.getCurrentVendingMachine().setLoggedUser(userService.findByUsername(username));
             return "Log in successful!";
         } else {
             return "Log in failed";
@@ -110,31 +120,24 @@ public class VendingMachinesController {
         } catch (AssertionError e) {
             throw new VendingMachineException("You are not operating any vending machines currently!");
         }
-        if (Utils.convertProductDTOToEntity(productService.findByName(product.getName())).equals(product)) {
+        Product anotherProduct =  productService.findByName(product.getName());
+        if (anotherProduct!= null && anotherProduct.getName().equals(product.getName())) {
             vendingMachineService.loadProduct(code);
         } else {
             throw new VendingMachineException("The product cannot be added because it does not exist!");
         }
     }
 
-    @PostMapping(path = "/createIntialSlotsForMachine")
+    @PostMapping(path = "/createInitialSlotsForMachine")
     public void createSlots(@RequestParam String firstSlotCode, @RequestParam String lastSlotCode) throws VendingMachineException {
         if (firstSlotCode.charAt(0) > lastSlotCode.charAt(0)) {
             throw new VendingMachineException("The first slot letter has to be lower/equal to the last one");
         } else if (Integer.parseInt(firstSlotCode.substring(1)) > Integer.parseInt(lastSlotCode.substring(1))) {
             throw new VendingMachineException("The first slot number cannot be higher than the last one's!");
         } else {
-            slotsForMachine = new ArrayList<>();
-            for (char row = firstSlotCode.charAt(0); row <= lastSlotCode.charAt(0); row++) {
-                for (int i = 1; i <= Integer.parseInt(lastSlotCode.substring(1)); i++) {
-                    String newCode = row + String.valueOf(i);
-                    Slot slot = new Slot(newCode, 0);
-                    slotsRepository.save(slot);
-                    slotsForMachine.add(slot);
-                }
-            }
+            slotsForMachine = Utils.buildSlotList(firstSlotCode,lastSlotCode);
+            slotsRepository.saveAll(slotsForMachine);
         }
-        //TODO verificat daca sloturile sunt valide in service
 
     }
 
@@ -148,7 +151,7 @@ public class VendingMachinesController {
             throw new VendingMachineException("The code is not valid!");
         } else {
 
-            Product product = Utils.convertProductDTOToEntity(productService.findByName(productName));
+            Product product = productService.findByName(productName);
             if (product == null) {
                 throw new ProductException("The product doesn't exist!");
             }
@@ -190,6 +193,56 @@ public class VendingMachinesController {
     @GetMapping(path = "/getSlots")
     public List<Slot> getSlotsForMachine() {
         return slotsForMachine;
+    }
+    @GetMapping(path="/payMoney")
+    public String payMoney(MoneyType moneyType) throws VendingMachineException, UserException {
+        vendingMachineService.payMoney(moneyType);
+        return "Transaction successful!";
+    }
+    @GetMapping(path = "/buyProducts")
+    public String buyProducts() {
+        if (userCodeList == null) {
+            return "The list of products has to exist!";
+        }
+        if(userCodeList.size() == 0)
+        {
+            return "The list cannot be empty!";
+        }
+        for (int i = 0; i < userCodeList.size(); i++) {
+            try {
+                String code = userCodeList.get(i);
+                vendingMachineService.buyProduct(code, i != userCodeList.size() - 1);
+            } catch (VendingMachineException e) {
+                if (Objects.equals(e.getMessage(), "Must insert more money!")) {
+                    String code = userCodeList.get(i);
+                    userCodeList = null;
+                    return "You didn't have enough money for product with code " + code;
+                }
+            }
+        }
+        return null;
+    }
+
+    @PostMapping(path = "/insertProductIntoShoppingList/")
+    public void addProductToShoppingList(@RequestParam String code) {
+        if (userCodeList == null) {
+            userCodeList = new ArrayList<>();
+        }
+        userCodeList.add(code);
+    }
+
+    @GetMapping(path = "/getShoppingList")
+    public List<String> getShoppingList() {
+        if (userCodeList == null)
+            return null;
+        else return userCodeList;
+    }
+
+    @DeleteMapping(path = "/deleteACodeFromShoppingList")
+    public void deleteCodeFromShoppingList(String code) throws VendingMachineException {
+        if (!userCodeList.contains(code)) {
+            throw new VendingMachineException("You haven't inserted that code!");
+        } else userCodeList.remove(code);
     }
 
 

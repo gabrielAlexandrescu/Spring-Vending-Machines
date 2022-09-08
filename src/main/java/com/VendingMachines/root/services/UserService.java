@@ -24,8 +24,8 @@ public class UserService {
         this.usersRepository = usersRepository;
     }
 
-    public UserDTO findByID(UUID ID) {
-        return userToDTO(usersRepository.findById(ID).orElseThrow(() -> new IllegalStateException("The user with this ID doesn't exist!")));
+    public User findByID(UUID ID) {
+        return usersRepository.findById(ID).orElseThrow(() -> new IllegalStateException("The user with this ID doesn't exist!"));
     }
 
     public User findByUsername(String username) {
@@ -38,11 +38,16 @@ public class UserService {
     }
 
     private User userDTOToEntity(UserDTO userDTO) {
-        return new User(userDTO.getUsername(), userDTO.getPassword(), false);
+        boolean isAdmin = Objects.equals(userDTO.getRole(), "admin");
+        return new User(userDTO.getUsername(), userDTO.getPassword(), isAdmin);
     }
 
     private UserDTO userToDTO(User user) {
-        return new UserDTO(user.getID(), user.getUsername(), user.getPassword(), user.getUserWallet());
+        boolean isAdmin = Objects.equals(user.getRole(), "admin");
+        UserDTO userDTO = new UserDTO(user.getUsername(), user.getPassword(),isAdmin);
+        userDTO.setID(user.getID());
+        userDTO.setUserWallet(user.getUserWallet());
+        return userDTO;
     }
 
     public void register(UserDTO userDTO) {
@@ -61,7 +66,7 @@ public class UserService {
     }
 
     public void update(UUID ID, User updatedUser) {
-        User oldUser = userDTOToEntity(findByID(ID));
+        User oldUser = findByID(ID);
         oldUser.setPassword(updatedUser.getPassword());
         oldUser.setUsername(updatedUser.getUsername());
         oldUser.setRole(updatedUser.getRole());
@@ -70,52 +75,54 @@ public class UserService {
         usersRepository.save(oldUser);
     }
 
-    public List<UserDTO> getAllUsers() {
-        List<User> users = usersRepository.findAll();
-        List<UserDTO> userDTOS = new ArrayList<>();
-        for (User user : users) {
-            userDTOS.add(userToDTO(user));
-        }
-        return userDTOS;
+    public List<User> getAllUsers() {
+        return usersRepository.findAll();
     }
 
-    public List<UserDTO> getAllAdmins() {
+    public List<User> getAllAdmins() {
         List<User> users = usersRepository.findAll();
-        List<UserDTO> userDTOS = new ArrayList<>();
+        List<User> admins = new ArrayList<>();
         for (User user : users) {
             if (Objects.equals(user.getRole(), "admin")) {
-                userDTOS.add(userToDTO(user));
+                admins.add(user);
             }
         }
-        return userDTOS;
+        return admins;
     }
 
-    public void addMoneyToWallet(UUID ID, MoneyType moneyType, Integer value) {
-        User user = userDTOToEntity(findByID(ID));
-
-        for (MoneyDTO obj : user.getUserWallet()) {
+    public void addMoneyToWallet(UUID ID, MoneyType moneyType, int value) {
+        User user = findByID(ID);
+        List<MoneyDTO> userWallet = user.getUserWallet();
+        for (MoneyDTO obj : userWallet) {
             if (obj.getMoneyType() == moneyType)
                 obj.setAmount(obj.getAmount() + value);
         }
+        user.setUserWallet(userWallet);
+        user.setID(ID);
+        usersRepository.save(user);
     }
 
-    public void removeMoneyFromWallet(UUID ID, MoneyType moneyType, Integer value) throws UserException {
-        User user = userDTOToEntity(findByID(ID));
-        for (MoneyDTO obj : user.getUserWallet()) {
+    public void removeMoneyFromWallet(UUID ID, MoneyType moneyType, int value) throws UserException {
+        User user = findByID(ID);
+        List<MoneyDTO> userWallet = user.getUserWallet();
+        for (MoneyDTO obj : userWallet) {
             if (obj.getMoneyType() == moneyType) {
                 if (obj.getAmount() < value) {
                     throw new UserException("The user doesn't have enough money for this operation!");
                 } else {
-                    obj.setAmount(0);
+                    obj.setAmount(obj.getAmount()-value);
                 }
             }
         }
+        user.setUserWallet(userWallet);
+        usersRepository.save(user);
     }
 
     public void addTransaction(UUID ID, Product product) {
-        User user = userDTOToEntity(findByID(ID));
+        User user = findByID(ID);
         Transaction transaction = new Transaction(ID, LocalDateTime.now(), product);
         user.getTransactions().add(transaction);
+        usersRepository.save(user);
     }
 
     public boolean logIn(String username, String password) throws UserException {

@@ -1,6 +1,7 @@
 package com.VendingMachines.root.model;
 
 import com.VendingMachines.root.commons.Utils;
+import com.VendingMachines.root.entities.Transaction;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,30 +15,31 @@ import java.util.UUID;
 @NoArgsConstructor
 @Component
 public class UserDTO {
-    @Id
-    @Getter
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-            name = "UUID",
-            strategy = "org.hibernate.id.UUIDGenerator"
-    )
-    private UUID ID;
     @Getter @Setter
     private String username;
     @Getter @Setter
     private String password;
     @Getter @Setter
     private List<MoneyDTO> userWallet;
+    @Getter @Setter
+    private UUID ID;
+    @Getter @Setter
+    private String role;
 
-    public UserDTO(UUID ID, String username, String password,List<MoneyDTO> userWallet) {
-        this.ID = ID;
+
+    public UserDTO(String username, String password,boolean isAdmin) {
         this.username = username;
         this.password = password;
-        this.userWallet = userWallet;
+        if(isAdmin){
+            role = "admin";
+        }
+        else{
+            role = "user";
+        }
     }
 
-    public UserDTO(UUID ID, String username, String password) {
-        this.ID = ID;
+    public UserDTO(String username, String password) {
+
         this.username = username;
         this.password = password;
         Utils.buildGenericWallet(this.userWallet);

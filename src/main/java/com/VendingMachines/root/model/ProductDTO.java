@@ -14,27 +14,14 @@ import java.util.UUID;
 @NoArgsConstructor
 @Data
 public class ProductDTO {
-    @Id
-    @Getter
-    @Setter
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-            name = "UUID",
-            strategy = "org.hibernate.id.UUIDGenerator"
-    )
-    private UUID ID;
     @Getter
     private String name;
     @Getter
     private ProductType productType;
+    @Getter @Setter
+    private UUID ID;
 
     public ProductDTO(String name, ProductType productType) {
-        this.name = name;
-        this.productType = productType;
-    }
-
-    public ProductDTO(UUID ID, String name, ProductType productType) {
-        this.ID = ID;
         this.name = name;
         this.productType = productType;
     }
